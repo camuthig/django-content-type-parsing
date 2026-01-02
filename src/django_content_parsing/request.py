@@ -1,8 +1,12 @@
 from typing import Type, List, Optional, TypeVar
 
-from django.http import HttpRequest as _HttpRequest
+from django.core.exceptions import TooManyFilesSent
+from django.core.handlers.wsgi import get_bytes_from_wsgi, get_str_from_wsgi
+from django.http import HttpRequest as _HttpRequest, parse_cookie
 from django.http import QueryDict
+from django.http.multipartparser import MultiPartParserError
 from django.utils.datastructures import MultiValueDict
+from django.utils.functional import cached_property
 
 from django_content_parsing import parsers
 from django_content_parsing.parsers import BaseParser
@@ -30,7 +34,6 @@ class ContentParsingMixin:
 
         The behaviors here will be integrated into Django core when the DEP is accepted.
         """
-        # WIP
         if methods and self.method not in methods:
             # Note: a method was provided but doesn't match the method set on
             # the request. In this case, we are not handling any real
@@ -42,7 +45,8 @@ class ContentParsingMixin:
             )
             return
         if self._read_started and not hasattr(self, "_body"):
-            # WIP Not sure why this is needed
+            # Note: This is an implementation of _mark_post_parse_error to
+            # support the dynamic attribute.
             setattr(self, data_attr, QueryDict())
             self._files = MultiValueDict()
 
@@ -64,15 +68,14 @@ class ContentParsingMixin:
                 else:
                     data, self._files = parser.parse(self.body)
                 setattr(self, data_attr, data)
-            except Exception as e:
-                # TODO 'application/x-www-form-urlencoded' didn't do this.
+            except (MultiPartParserError, TooManyFilesSent):
                 # An error occurred while parsing POST data. Since when
                 # formatting the error the request handler might access
                 # self.POST, set self._post and self._file to prevent
                 # attempts to parse POST data again.
                 setattr(self, data_attr, QueryDict())
                 self._files = MultiValueDict()
-                raise e
+                raise
         else:
             data, self._files = (
                 QueryDict(encoding=self._encoding),
@@ -94,6 +97,9 @@ class ContentParsingMixin:
 
     @property
     def data(self):
+        if getattr(self, "_post", None) is not None:
+            raise AttributeError("You cannot access request.data after parsing form_data or POST.")
+
         if not hasattr(self, "_data"):
             self._load_post_and_files("_data", self.parsers, methods=None)
         return self._data
@@ -101,6 +107,53 @@ class ContentParsingMixin:
     @data.setter
     def data(self, data):
         self._data = data
+
+    @property
+    def form_data(self):
+        if getattr(self, "_data", None) is not None:
+            raise AttributeError("You cannot access request.form_data after parsing data.")
+
+        if not hasattr(self, "_post"):
+            self._load_post_and_files("_post", self.parsers, methods=None)
+        return self._post
+
+    @property
+    def POST(self):
+        if getattr(self, "_data", None) is not None:
+            raise AttributeError("You cannot access request.POST after parsing data.")
+
+        return self.form_data
+
+    @property
+    def files(self):
+        if not hasattr(self, "_files"):
+            self._load_post_and_files()
+
+        return self._files
+
+    @property
+    def FILES(self):
+        return self.files
+
+    @cached_property
+    def query_params(self):
+        # The WSGI spec says 'QUERY_STRING' may be absent.
+        raw_query_string = get_bytes_from_wsgi(self.environ, "QUERY_STRING", "")
+        return QueryDict(raw_query_string, encoding=self._encoding)
+
+    @property
+    def GET(self):
+        return self.query_params
+
+    @cached_property
+    def cookies(self):
+        raw_cookie = get_str_from_wsgi(self.environ, "HTTP_COOKIE", "")
+        return parse_cookie(raw_cookie)
+
+    @property
+    def COOKIES(self):
+        return self.cookies
+
 
 
 class HttpRequest(ContentParsingMixin, _HttpRequest):
