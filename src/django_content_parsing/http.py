@@ -2,10 +2,21 @@ import base64
 import binascii
 
 from django.conf import settings
-from django.core.exceptions import TooManyFieldsSent, RequestDataTooBig, TooManyFilesSent
-from django.core.files.uploadhandler import StopFutureHandlers, StopUpload, SkipFile
-from django.http.multipartparser import MultiPartParser as _MultiPartParser, ChunkIter, LazyStream, Parser, FIELD_TYPES, \
-    FIELD, FILE, MultiPartParserError, exhaust
+from django.core.exceptions import RequestDataTooBig
+from django.core.exceptions import TooManyFieldsSent
+from django.core.exceptions import TooManyFilesSent
+from django.core.files.uploadhandler import SkipFile
+from django.core.files.uploadhandler import StopFutureHandlers
+from django.core.files.uploadhandler import StopUpload
+from django.http.multipartparser import FIELD
+from django.http.multipartparser import FIELD_TYPES
+from django.http.multipartparser import FILE
+from django.http.multipartparser import ChunkIter
+from django.http.multipartparser import LazyStream
+from django.http.multipartparser import MultiPartParser as _MultiPartParser
+from django.http.multipartparser import MultiPartParserError
+from django.http.multipartparser import Parser
+from django.http.multipartparser import exhaust
 from django.utils.datastructures import MultiValueDict
 from django.utils.encoding import force_str
 
@@ -96,8 +107,7 @@ class MultiPartParser(_MultiPartParser):
                     # last boundary.
                     if settings.DATA_UPLOAD_MAX_NUMBER_FIELDS + 2 < num_post_keys:
                         raise TooManyFieldsSent(
-                            "The number of GET/POST parameters exceeded "
-                            "settings.DATA_UPLOAD_MAX_NUMBER_FIELDS."
+                            "The number of GET/POST parameters exceeded settings.DATA_UPLOAD_MAX_NUMBER_FIELDS."
                         )
 
                 try:
@@ -157,8 +167,7 @@ class MultiPartParser(_MultiPartParser):
                             and num_bytes_read > settings.DATA_UPLOAD_MAX_MEMORY_SIZE
                         ):
                             raise RequestDataTooBig(
-                                "Request body exceeded "
-                                "settings.DATA_UPLOAD_MAX_MEMORY_SIZE."
+                                "Request body exceeded settings.DATA_UPLOAD_MAX_MEMORY_SIZE."
                             )
 
                         self._post.appendlist(
@@ -173,8 +182,7 @@ class MultiPartParser(_MultiPartParser):
                         and num_files > settings.DATA_UPLOAD_MAX_NUMBER_FILES
                     ):
                         raise TooManyFilesSent(
-                            "The number of files exceeded "
-                            "settings.DATA_UPLOAD_MAX_NUMBER_FILES."
+                            "The number of files exceeded settings.DATA_UPLOAD_MAX_NUMBER_FILES."
                         )
                     # This is a file, use the handler...
                     file_name = disposition.get("filename")

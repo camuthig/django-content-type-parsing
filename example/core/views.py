@@ -17,10 +17,12 @@ def write_json(request: HttpRequest):
 def write_file(request: HttpRequest):
     data = request.data
     f = request.files.get("file")
-    return JsonResponse({
-        "file_message": f"{f.read().decode('utf-8')}",
-        "text_message": f"File message: {data['message']}",
-    })
+    return JsonResponse(
+        {
+            "file_message": f"{f.read().decode('utf-8')}",
+            "text_message": f"File message: {data['message']}",
+        }
+    )
 
 
 @csrf_exempt
@@ -37,10 +39,12 @@ def write_json_old(request):
 def write_file_old(request):
     data = request.POST
     f = request.FILES.get("file")
-    return JsonResponse({
-        "file_message": f"{f.read().decode('utf-8')}",
-        "text_message": f"File message: {data['message']}",
-    })
+    return JsonResponse(
+        {
+            "file_message": f"{f.read().decode('utf-8')}",
+            "text_message": f"File message: {data['message']}",
+        }
+    )
 
 
 @csrf_exempt
@@ -60,13 +64,15 @@ def form_form_data(request):
 
 @csrf_exempt
 def invalid_data_after_post(request):
-    post_data = request.POST
-    data_data = request.data  # This will throw an error!
+    post_data = request.POST  # noqa: F841
+    # This will throw an error!
+    data_data = request.data  # noqa: F841
     return JsonResponse({"message": f"JSON message: {request.data['message']}"})
 
 
 @csrf_exempt
 def invalid_post_after_data(request):
-    data_data = request.data
-    post_data = request.POST  # This will throw an error!
+    data_data = request.data  # noqa: F841
+    # This will throw an error!
+    post_data = request.POST  # noqa: F841
     return JsonResponse({"message": f"JSON message: {request.data['message']}"})

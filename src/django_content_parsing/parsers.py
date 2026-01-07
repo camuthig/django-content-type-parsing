@@ -2,8 +2,10 @@ import json
 from io import BytesIO
 
 from django.core.exceptions import BadRequest
+from django.utils.datastructures import ImmutableList
+from django.utils.datastructures import MultiValueDict
+
 from django_content_parsing.http import MultiPartParser as _MultiPartParser
-from django.utils.datastructures import ImmutableList, MultiValueDict
 
 
 class BaseParser:
@@ -34,8 +36,7 @@ class FormParser(BaseParser):
             and self.request._encoding.lower() != "utf-8"
         ):
             raise BadRequest(
-                "HTTP requests with the 'application/x-www-form-urlencoded' "
-                "content type must be UTF-8 encoded."
+                "HTTP requests with the 'application/x-www-form-urlencoded' content type must be UTF-8 encoded."
             )
 
     def parse(self, data):
@@ -59,8 +60,7 @@ class MultiPartParser(BaseParser):
             request.upload_handlers = ImmutableList(
                 request.upload_handlers,
                 warning=(
-                    "You cannot alter upload handlers after the upload has been "
-                    "processed."
+                    "You cannot alter upload handlers after the upload has been processed."
                 ),
             )
         parser = _MultiPartParser(

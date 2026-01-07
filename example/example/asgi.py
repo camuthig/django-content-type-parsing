@@ -11,6 +11,6 @@ import os
 
 from django_content_parsing.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'example.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "example.settings")
 
 application = get_asgi_application()

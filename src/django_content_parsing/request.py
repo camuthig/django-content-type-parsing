@@ -1,16 +1,20 @@
-from typing import Type, List, Optional, TypeVar
+from typing import List
+from typing import Optional
+from typing import Type
+from typing import TypeVar
 
 from django.core.exceptions import TooManyFilesSent
-from django.core.handlers.wsgi import get_bytes_from_wsgi, get_str_from_wsgi
-from django.http import HttpRequest as _HttpRequest, parse_cookie
+from django.core.handlers.wsgi import get_bytes_from_wsgi
+from django.core.handlers.wsgi import get_str_from_wsgi
+from django.http import HttpRequest as _HttpRequest
 from django.http import QueryDict
+from django.http import parse_cookie
 from django.http.multipartparser import MultiPartParserError
 from django.utils.datastructures import MultiValueDict
 from django.utils.functional import cached_property
 
 from django_content_parsing import parsers
 from django_content_parsing.parsers import BaseParser
-
 
 BP = TypeVar("BP", bound=BaseParser)
 
@@ -23,11 +27,12 @@ class ContentParsingMixin:
     django.http.HttpRequest when merged into Django core. It is a mixin within
     this proof of concept to avoid init conflicts with ASGIRequest and WSGIRequest
     """
+
     def _load_post_and_files(
-            self,
-            data_attr="_post",
-            parser_list: Optional[List[Type[BP]]] = None,
-            methods=("POST",),
+        self,
+        data_attr="_post",
+        parser_list: Optional[List[Type[BP]]] = None,
+        methods=("POST",),
     ):
         """
         An override of Django's internal _load_post_and_files method.
@@ -98,7 +103,9 @@ class ContentParsingMixin:
     @property
     def data(self):
         if getattr(self, "_post", None) is not None:
-            raise AttributeError("You cannot access request.data after parsing form_data or POST.")
+            raise AttributeError(
+                "You cannot access request.data after parsing form_data or POST."
+            )
 
         if not hasattr(self, "_data"):
             self._load_post_and_files("_data", self.parsers, methods=None)
@@ -111,7 +118,9 @@ class ContentParsingMixin:
     @property
     def form_data(self):
         if getattr(self, "_data", None) is not None:
-            raise AttributeError("You cannot access request.form_data after parsing data.")
+            raise AttributeError(
+                "You cannot access request.form_data after parsing data."
+            )
 
         if not hasattr(self, "_post"):
             self._load_post_and_files("_post", self.parsers, methods=None)
@@ -155,11 +164,11 @@ class ContentParsingMixin:
         return self.cookies
 
 
-
 class HttpRequest(ContentParsingMixin, _HttpRequest):
     """
     A subclass of Django's HttpRequest that supports content parsing.
 
     This is used only for better type hinting at this phase.
     """
+
     pass
