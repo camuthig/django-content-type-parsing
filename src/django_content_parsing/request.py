@@ -89,7 +89,7 @@ class ContentParsingMixin:
 
     @parsers.setter
     def parsers(self, parsers):
-        if hasattr(self, "_data") or hasattr(self, "_files"):
+        if hasattr(self, "_data") or hasattr(self, "_post") or hasattr(self, "_files"):
             raise AttributeError(
                 "You cannot change parsers after processing the request's content."
             )
