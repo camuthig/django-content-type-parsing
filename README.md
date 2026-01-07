@@ -116,9 +116,11 @@ def custom_json_view(request: HttpRequest):
 
     data = request.data
 
-    # do you work
+    # do your work
     return HttpResponse()
 ```
+
+Alternatively, a middleware could be used to apply custom parsers to all requests.
 
 # History of This Change
 
@@ -126,9 +128,9 @@ This change has been a work in progress for over a decade, starting with
 [this ticket](https://code.djangoproject.com/ticket/21442) from 2013 where the idea of configured request parsing was
 first introduced. 
 
-I was nearly merged in [2021](https://code.djangoproject.com/ticket/32259), however it was decided that the changes
+It was nearly merged in [2021](https://code.djangoproject.com/ticket/32259), however, it was decided that the changes
 would be too disruptive. This did lead to 
 [good discussions](https://forum.djangoproject.com/t/request-for-steering-council-vote-on-modernising-the-request-object/26816) 
 on what would make the attribute renaming worthwhile. Specifically, it was decided that getting new functionality, like
-content-type based parsing, would make it more worthwhile. Both points needed to go fully through the DEP process
+content-type parsing, would make it more worthwhile. Both points needed to go fully through the DEP process
 and be considered by the steering council to proceed.
