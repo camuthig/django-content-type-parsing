@@ -55,10 +55,6 @@ class MultiPartParser(BaseParser):
         else:
             request_data = request
 
-        # WIP - POST and data can be called on the same request. This parser can be
-        # called multiple times on the same request. While `_post` and `_data` are
-        # different, `_files` is the same. Allow parsing them twice, but don't
-        # change the handlers?
         if not hasattr(request, "_files"):
             request.upload_handlers = ImmutableList(
                 request.upload_handlers,
